@@ -1,0 +1,32 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+type Query {
+  user(
+    "primary key"
+    id: Int!
+  ): user!
+  users(
+    "search by name"
+    name: String!
+  ): [user!]!
+  login(email: String!, password: String!): user!
+  logout: Boolean!
+  verifyToken: user!
+}
+type user {
+  id: Int!
+  name: String!
+  email: String!
+  password: String!
+  verified: Boolean!
+}
+type Mutation {
+  onboard(name: String!, email: String!, password: String!): user!
+}
+"Exposes a URL that specifies the behavior of this scalar."
+directive @specifiedBy(
+    "The URL that specifies the behavior of this scalar."
+    url: String!
+  ) on SCALAR

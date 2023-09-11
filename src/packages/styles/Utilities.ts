@@ -1,0 +1,20 @@
+import { StyleSheet } from "react-native";
+
+export const UtilityStyles = StyleSheet.create({
+  Center: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  Fill: {
+    flex: 1,
+    height: "100%",
+    width: "100%",
+  },
+  Overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    height: "100%",
+    width: "100%",
+  },
+});
