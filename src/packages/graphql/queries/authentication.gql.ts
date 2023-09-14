@@ -18,8 +18,8 @@ export const loginQuery = gql`
 
 export const verifyQuery = gql`
   ${UserFragment}
-  query Verify {
-    verifyToken {
+  query Verify($token: String!) {
+    verifyTokenMobile(token: $token) {
       ...UserFragment
     }
   }

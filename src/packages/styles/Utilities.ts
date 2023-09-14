@@ -17,4 +17,10 @@ export const UtilityStyles = StyleSheet.create({
     height: "100%",
     width: "100%",
   },
+  Shadow: {
+    shadowOpacity: 0.2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2.5 },
+    shadowRadius: 5,
+  },
 });

@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Login } from "@screens/login";
 import { SignUp } from "@screens/signup";
-import { Home } from "@screens/home";
+import { App } from "@screens/app";
 
 const Stack = createNativeStackNavigator();
 
@@ -15,10 +15,10 @@ export class Router extends Component {
   render() {
     return (
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="home">
+        <Stack.Navigator initialRouteName="app">
           <Stack.Screen
-            name="home"
-            component={Home}
+            name="app"
+            component={App}
             options={Router.ScreenProps}
           />
           <Stack.Screen

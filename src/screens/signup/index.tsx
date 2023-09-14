@@ -11,7 +11,7 @@ import { onboardMutation } from "@packages/graphql/queries/authentication.gql";
 import { SetCookiePlugin } from "@packages/graphql/plugins/SetCookiePlugin";
 import { Authentication } from "@packages/state/Authentication";
 import { AuthScreen } from "@packages/components/auth-screen";
-import { Styles } from "./Styles";
+import { Styles } from "@packages/components/auth-screen/Styles";
 import type { State } from "./types";
 
 export class SignUp extends Component<
@@ -110,7 +110,7 @@ export class SignUp extends Component<
         success: true,
       });
       setTimeout(() => {
-        this.props.navigation.navigate("home");
+        this.props.navigation.navigate("app");
       }, 1000);
     } catch (error: any) {
       this.setState({ error: error.message, loading: false });
@@ -125,7 +125,7 @@ export class SignUp extends Component<
     const { name, email, password, error, loading, success } = this.state;
     return (
       <ProtectedRoute
-        redirect="/"
+        redirect="app"
         condition={() => !Authentication.getState().token}>
         <AuthScreen>
           <View style={Styles.greeting}>

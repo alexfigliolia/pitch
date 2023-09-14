@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { UtilityStyles } from "@packages/styles/Utilities";
+import { Theme } from "@packages/styles";
 
 export const Styles = StyleSheet.create({
   container: {
@@ -11,7 +12,7 @@ export const Styles = StyleSheet.create({
     shadowColor: "#d6d6d6",
     shadowOffset: { width: 0, height: 2.5 },
     shadowRadius: 5,
-    backgroundColor: "rgb(255, 179, 97)",
+    backgroundColor: Theme.CORE_ORANGE,
   },
   loader: {
     height: 35,

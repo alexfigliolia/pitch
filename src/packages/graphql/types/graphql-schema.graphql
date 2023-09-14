@@ -13,17 +13,84 @@ type Query {
   ): [user!]!
   login(email: String!, password: String!): user!
   logout: Boolean!
+  feed(
+    "User primary key"
+    id: Int!,
+    "The start index of posts to pull"
+    startIndex: Int!
+  ): [Post!]!
   verifyToken: user!
+  verifyTokenMobile(
+    "The user cookie"
+    token: String!
+  ): user!
 }
 type user {
   id: Int!
   name: String!
   email: String!
-  password: String!
   verified: Boolean!
+}
+type Post {
+  "Primary key"
+  id: Int!
+  "Author"
+  created_by: user!
+  "Created at"
+  created_at: String!
+  "Title text"
+  title: String!
+  "Summary text"
+  text: String!
+  "tags"
+  tags: [String!]!
+  "visibility"
+  visibility: Visibility!
+  "Total number of likes and comments"
+  _count: PostStats!
+}
+type PostStats {
+  "The total number of likes"
+  likes: Int!
+  "The total number of comments"
+  comments: Int!
 }
 type Mutation {
   onboard(name: String!, email: String!, password: String!): user!
+  addPostLike(
+    "User primary key"
+    user_id: Int!,
+    "Post primary key"
+    post_id: Int!
+  ): PostLikeType!
+  removePostLike(
+    "User primary key"
+    user_id: Int!,
+    "Post primary key"
+    post_id: Int!
+  ): PostLikeType!
+  createPost(
+    "User primary key"
+    user_id: Int!,
+    "Post title"
+    title: String!,
+    "Post text"
+    text: String!,
+    "Post tags"
+    tags: [String!]!,
+    "Post visibility"
+    visibility: Visibility!
+  ): Post!
+}
+type PostLikeType {
+  id: Int!
+  user_id: Int!
+  post_id: Int!
+  created_by: user!
+}
+enum Visibility {
+  public
+  friends
 }
 "Exposes a URL that specifies the behavior of this scalar."
 directive @specifiedBy(

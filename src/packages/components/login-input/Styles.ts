@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { UtilityStyles } from "@packages/styles/Utilities";
+import { Theme } from "@packages/styles";
 
 export const Styles = StyleSheet.create({
   container: {
@@ -20,7 +21,7 @@ export const Styles = StyleSheet.create({
     boxSizing: "border-box",
   },
   valid: {
-    borderColor: "rgb(255, 179, 97)",
+    borderColor: Theme.CORE_ORANGE,
   },
   input: {
     width: "90%",

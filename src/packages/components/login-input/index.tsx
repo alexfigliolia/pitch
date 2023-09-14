@@ -8,8 +8,8 @@ import type { Validator } from "./types";
 export const LoginInput: FC<
   {
     value: string;
-    placeholder?: string;
     password?: boolean;
+    placeholder?: string;
     validator?: Validator;
     onChangeText: (text: string) => void;
   } & TextInputProps
