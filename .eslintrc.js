@@ -13,6 +13,7 @@ module.exports = {
     "eslint:recommended",
     "prettier",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:react-hooks/recommended"
   ],
   overrides: [
     {
@@ -48,6 +49,8 @@ module.exports = {
     "react-native/split-platform-components": 2,
     "react-native/no-color-literals": 0,
     "react-native/no-raw-text": 2,
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
     "@typescript-eslint/unbound-method": 0,
     "@typescript-eslint/no-unsafe-argument": 0,
     "@typescript-eslint/no-unsafe-return": 0,

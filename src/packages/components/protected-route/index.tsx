@@ -1,7 +1,6 @@
-import type { NavigationProp } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native";
 import type { FC, ReactNode } from "react";
 import React, { Fragment } from "react";
+import { Router } from "@figliolia/rn-navigation";
 
 export interface Props {
   redirect: string;
@@ -14,9 +13,8 @@ export const ProtectedRoute: FC<Props> = ({
   redirect = "login",
   condition,
 }) => {
-  const navigation = useNavigation<NavigationProp<any>>();
   if (!condition) {
-    navigation.navigate(redirect);
+    Router.navigate(redirect);
   }
   return <Fragment>{children}</Fragment>;
 };

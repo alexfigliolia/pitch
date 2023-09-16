@@ -1,17 +1,14 @@
 import React, { memo, useCallback } from "react";
 import { TouchableOpacity, View } from "react-native";
-import { Styles } from "./Styles";
+import { Router } from "@figliolia/rn-navigation";
 import { UtilityStyles } from "@packages/styles";
 import { Plus } from "@packages/icons/plus";
-import type { NavigationProp } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native";
+import { Styles } from "./Styles";
 
 export const AddPost = memo(() => {
-  const navigation = useNavigation<NavigationProp<any>>();
-
   const navigate = useCallback(() => {
-    navigation.navigate("create-post");
-  }, [navigation]);
+    Router.navigate("create-post");
+  }, []);
 
   return (
     <View style={Styles.container}>

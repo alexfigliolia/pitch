@@ -1,48 +1,28 @@
 import React, { Component } from "react";
-import { View } from "react-native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Router } from "@figliolia/rn-navigation";
 import { Feed } from "@screens/feed";
 import { AuthenticatedRoute } from "@packages/components/authenticated-route";
-import { Styles } from "./Styles";
 import { CreatePost } from "@screens/create-post";
 import { Settings } from "@screens/settings";
 import { CoreTabs } from "@packages/core-layout/core-tabs";
-
-const Stack = createNativeStackNavigator();
+import { CoreView } from "@packages/core-layout/core-view";
 
 export class App extends Component {
-  static ScreenProps = {
-    headerShown: false,
-  };
-
   render() {
     return (
       <AuthenticatedRoute redirect="sign-up">
-        <View style={Styles.container}>
-          <Stack.Navigator initialRouteName="feed">
-            <Stack.Screen
-              name="feed"
-              component={Feed}
-              options={App.ScreenProps}
-            />
-            <Stack.Screen
-              name="profile"
-              component={Settings}
-              options={App.ScreenProps}
-            />
-            <Stack.Screen
-              name="settings"
-              component={Settings}
-              options={App.ScreenProps}
-            />
-            <Stack.Screen
-              name="create-post"
-              component={CreatePost}
-              options={App.ScreenProps}
-            />
-          </Stack.Navigator>
-          <CoreTabs />
-        </View>
+        <CoreView>
+          <Router
+            defaultRoute="feed"
+            routes={[
+              { name: "feed", component: Feed },
+              { name: "profile", component: Settings },
+              { name: "settings", component: Settings },
+              { name: "create-post", component: CreatePost },
+            ]}
+          />
+        </CoreView>
+        <CoreTabs />
       </AuthenticatedRoute>
     );
   }

@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { LayoutAnimation } from "react-native";
 import { Svg, G, Path } from "react-native-svg";
 
 interface Props {
@@ -12,12 +11,6 @@ export class Profile extends Component<Props> {
     color: "#fff",
     fill: false,
   };
-
-  UNSAFE_componentWillReceiveProps({ fill, color }: Props) {
-    if (fill !== this.props.fill || color !== this.props.color) {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
-    }
-  }
 
   render() {
     const { fill, color } = this.props;

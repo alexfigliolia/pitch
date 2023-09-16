@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { View, Text, TouchableHighlight } from "react-native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Text, TouchableHighlight, Animated } from "react-native";
+import { Router } from "@figliolia/rn-navigation";
 import { ProtectedRoute } from "@packages/components/protected-route";
 import { LoginInput } from "@packages/components/login-input";
 import { Validators } from "@packages/forms";
@@ -12,12 +12,11 @@ import { SetCookiePlugin } from "@packages/graphql/plugins/SetCookiePlugin";
 import { Authentication } from "@packages/state/Authentication";
 import { AuthScreen } from "@packages/components/auth-screen";
 import { Styles } from "@packages/components/auth-screen/Styles";
+import { basicInterpolator } from "@packages/styles";
 import type { State } from "./types";
 
-export class SignUp extends Component<
-  { navigation: NativeStackNavigationProp<Record<string, object | undefined>> },
-  State
-> {
+export class SignUp extends Component<Record<string, never>, State> {
+  private static animator = new Animated.Value(0);
   constructor(props: any) {
     super(props);
     this.state = {
@@ -28,6 +27,22 @@ export class SignUp extends Component<
       loading: false,
       success: false,
     };
+  }
+
+  public static enter() {
+    return new Promise<void>(resolve => {
+      Animated.timing(this.animator, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }).start(() => {
+        resolve();
+      });
+    });
+  }
+
+  public static exit() {
+    this.animator.setValue(0);
   }
 
   private onChange(key: keyof State) {
@@ -110,7 +125,7 @@ export class SignUp extends Component<
         success: true,
       });
       setTimeout(() => {
-        this.props.navigation.navigate("app");
+        Router.navigate("app");
       }, 1000);
     } catch (error: any) {
       this.setState({ error: error.message, loading: false });
@@ -118,7 +133,7 @@ export class SignUp extends Component<
   }
 
   private navigate = () => {
-    this.props.navigation.navigate("login");
+    Router.navigate("login");
   };
 
   render() {
@@ -128,11 +143,19 @@ export class SignUp extends Component<
         redirect="app"
         condition={() => !Authentication.getState().token}>
         <AuthScreen>
-          <View style={Styles.greeting}>
+          <Animated.View
+            style={[
+              Styles.greeting,
+              { opacity: basicInterpolator(SignUp.animator) },
+            ]}>
             <Text style={Styles.title}>Hello!</Text>
             <Text style={Styles.subtext}>Create an account</Text>
-          </View>
-          <View style={Styles.form}>
+          </Animated.View>
+          <Animated.View
+            style={[
+              Styles.form,
+              { opacity: basicInterpolator(SignUp.animator) },
+            ]}>
             <Text style={Styles.error}>&nbsp;{error}&nbsp;</Text>
             <LoginInput
               value={name}
@@ -164,13 +187,17 @@ export class SignUp extends Component<
               success={success}
               onPress={this.submit}
             />
-          </View>
-          <View style={Styles.redirect}>
+          </Animated.View>
+          <Animated.View
+            style={[
+              Styles.redirect,
+              { opacity: basicInterpolator(SignUp.animator) },
+            ]}>
             <Text style={Styles.redirectReason}>Already have an account?</Text>
             <TouchableHighlight onPress={this.navigate}>
               <Text style={Styles.redirectLink}>Login!</Text>
             </TouchableHighlight>
-          </View>
+          </Animated.View>
         </AuthScreen>
       </ProtectedRoute>
     );

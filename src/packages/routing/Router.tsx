@@ -1,38 +1,27 @@
 import React, { Component } from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Router as NativeRouter } from "@figliolia/rn-navigation";
 import { Login } from "@screens/login";
 import { SignUp } from "@screens/signup";
 import { App } from "@screens/app";
-
-const Stack = createNativeStackNavigator();
+import { View } from "react-native";
+import { Styles } from "./Styles";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export class Router extends Component {
-  static ScreenProps = {
-    headerShown: false,
-  };
-
   render() {
     return (
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="app">
-          <Stack.Screen
-            name="app"
-            component={App}
-            options={Router.ScreenProps}
+      <SafeAreaProvider>
+        <View style={Styles.app}>
+          <NativeRouter
+            defaultRoute="app"
+            routes={[
+              { name: "app", component: App },
+              { name: "login", component: Login },
+              { name: "sign-up", component: SignUp },
+            ]}
           />
-          <Stack.Screen
-            name="login"
-            component={Login}
-            options={Router.ScreenProps}
-          />
-          <Stack.Screen
-            name="sign-up"
-            component={SignUp}
-            options={Router.ScreenProps}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+        </View>
+      </SafeAreaProvider>
     );
   }
 }

@@ -1,12 +1,11 @@
 import type { FC, ReactNode } from "react";
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
+import { Router } from "@figliolia/rn-navigation";
 import { DeviceStorage } from "@packages/local-storage";
 import { verifyQuery } from "@packages/graphql/queries/authentication.gql";
 import { Authentication } from "@packages/state/Authentication";
 import type { Query, VerifyQueryVariables } from "@packages/graphql";
 import { GraphQLClient } from "@packages/graphql";
-import type { NavigationProp } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native";
 
 export interface Props {
   redirect?: string;
@@ -17,11 +16,11 @@ export const AuthenticatedRoute: FC<Props> = ({
   children,
   redirect = "login",
 }) => {
-  const navigation = useNavigation<NavigationProp<any>>();
+  const [checked, setChecked] = useState(false);
   useEffect(() => {
     void DeviceStorage.getItem("P_User").then(async token => {
       if (!token) {
-        return navigation.navigate(redirect);
+        return Router.navigate(redirect);
       }
       const client = new GraphQLClient<
         Pick<Query, "verifyTokenMobile">,
@@ -35,7 +34,7 @@ export const AuthenticatedRoute: FC<Props> = ({
       try {
         const response = await client.request();
         if (response.errors?.length) {
-          return navigation.navigate(redirect);
+          return Router.navigate(redirect);
         }
         const user = response.data.verifyTokenMobile;
         Authentication.update(state => {
@@ -44,10 +43,16 @@ export const AuthenticatedRoute: FC<Props> = ({
           state.email = user.email;
           state.verified = user.verified;
         });
+        setChecked(true);
       } catch (error) {
-        return navigation.navigate(redirect);
+        return Router.navigate(redirect);
       }
     });
-  }, [navigation, redirect]);
+  }, [redirect]);
+
+  if (!checked) {
+    return null;
+  }
+
   return <Fragment>{children}</Fragment>;
 };

@@ -1,7 +1,6 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import type { ListRenderItemInfo } from "react-native";
-import { FlatList, View } from "react-native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { FlatList } from "react-native";
 import type { Post, Query, QueryFeedArgs } from "@packages/graphql";
 import { graphQLRequest } from "@packages/graphql";
 import { feedQuery } from "@packages/graphql/queries/feed.gql";
@@ -19,7 +18,6 @@ interface State {
 
 interface Props {
   feed: Post[];
-  navigation?: NativeStackNavigationProp<Record<string, object | undefined>>;
 }
 
 class FeedComponent extends Component<Props, State> {
@@ -57,7 +55,7 @@ class FeedComponent extends Component<Props, State> {
 
   render() {
     return (
-      <View style={Styles.feed}>
+      <Fragment>
         <FlatList
           data={this.props.feed}
           style={Styles.scrollView}
@@ -65,7 +63,7 @@ class FeedComponent extends Component<Props, State> {
           contentContainerStyle={Styles.itemContainer}
         />
         <AddPost />
-      </View>
+      </Fragment>
     );
   }
 }
