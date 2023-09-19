@@ -9,7 +9,7 @@ export const Styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.15,
     shadowRadius: 2.5,
-    shadowOffset: { height: 1.5, width: 0 },
+    shadowOffset: { height: 2.5, width: 0 },
     ...UtilityStyles.Center,
     paddingTop: 10,
     paddingBottom: 10,

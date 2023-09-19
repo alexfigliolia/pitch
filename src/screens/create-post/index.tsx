@@ -26,9 +26,9 @@ import { Authentication } from "@packages/state/Authentication";
 import { Visibility } from "@packages/posts";
 
 export const CreatePost = () => {
+  const [, setError] = useState("");
   const [text, setText] = useState("");
   const [title, setTitle] = useState("");
-  const [, setError] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [visibility, setVisibility] = useState("");
 

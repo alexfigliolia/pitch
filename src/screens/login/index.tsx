@@ -16,7 +16,7 @@ import { basicInterpolator } from "@packages/styles";
 import type { State } from "./types";
 
 export class Login extends Component<Record<string, never>, State> {
-  private static animator = new Animated.Value(0);
+  private animator = new Animated.Value(0);
   constructor(props: any) {
     super(props);
     this.state = {
@@ -26,22 +26,24 @@ export class Login extends Component<Record<string, never>, State> {
       loading: false,
       success: false,
     };
+    Router.registerExitTransition(this.transition(0));
   }
 
-  public static enter() {
-    return new Promise<void>(resolve => {
-      Animated.timing(this.animator, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }).start(() => {
-        resolve();
+  componentDidMount() {
+    void this.transition(1)();
+  }
+
+  private transition(toValue: 0 | 1) {
+    return () =>
+      new Promise<void>(resolve => {
+        Animated.timing(this.animator, {
+          toValue,
+          duration: 1000,
+          useNativeDriver: true,
+        }).start(() => {
+          resolve();
+        });
       });
-    });
-  }
-
-  public static exit() {
-    this.animator.setValue(0);
   }
 
   private onChange(key: keyof State) {
@@ -96,12 +98,6 @@ export class Login extends Component<Record<string, never>, State> {
         },
         plugins: [SetCookiePlugin],
       });
-      if (response.errors?.length) {
-        return this.setState({
-          loading: false,
-          error: response.errors[0].message,
-        });
-      }
       const user = response.data.login;
       Authentication.update(state => {
         state.id = user.id;
@@ -135,7 +131,7 @@ export class Login extends Component<Record<string, never>, State> {
           <Animated.View
             style={[
               Styles.greeting,
-              { opacity: basicInterpolator(Login.animator) },
+              { opacity: basicInterpolator(this.animator) },
             ]}>
             <Text style={Styles.title}>Hello!</Text>
             <Text style={Styles.subtext}>Sign into your account</Text>
@@ -143,7 +139,7 @@ export class Login extends Component<Record<string, never>, State> {
           <Animated.View
             style={[
               Styles.form,
-              { opacity: basicInterpolator(Login.animator) },
+              { opacity: basicInterpolator(this.animator) },
             ]}>
             <Text style={Styles.error}>&nbsp;{error}&nbsp;</Text>
             <LoginInput
@@ -173,7 +169,7 @@ export class Login extends Component<Record<string, never>, State> {
           <Animated.View
             style={[
               Styles.redirect,
-              { opacity: basicInterpolator(Login.animator) },
+              { opacity: basicInterpolator(this.animator) },
             ]}>
             <Text style={Styles.redirectReason}>Are you new here?</Text>
             <TouchableHighlight onPress={this.navigate}>

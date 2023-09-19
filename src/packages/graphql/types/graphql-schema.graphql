@@ -20,6 +20,10 @@ type Query {
     startIndex: Int!
   ): [Post!]!
   verifyToken: user!
+  postComments(
+    "A post's primary key"
+    post_id: Int!
+  ): [Comment!]!
   verifyTokenMobile(
     "The user cookie"
     token: String!
@@ -55,6 +59,22 @@ type PostStats {
   "The total number of comments"
   comments: Int!
 }
+type Comment {
+  id: Int!
+  user_id: Int!
+  post_id: Int!
+  text: String!
+  created_at: String!
+  created_by: user!
+  _count: CommentCount!
+  likes: [UserRep!]!
+}
+type CommentCount {
+  likes: Int!
+}
+type UserRep {
+  user_id: Int!
+}
 type Mutation {
   onboard(name: String!, email: String!, password: String!): user!
   addPostLike(
@@ -68,7 +88,7 @@ type Mutation {
     user_id: Int!,
     "Post primary key"
     post_id: Int!
-  ): PostLikeType!
+  ): Boolean!
   createPost(
     "User primary key"
     user_id: Int!,
@@ -81,6 +101,14 @@ type Mutation {
     "Post visibility"
     visibility: Visibility!
   ): Post!
+  createComment(
+    "The comment text"
+    text: String!,
+    "A post's primary key"
+    post_id: Int!,
+    "A user's primary key"
+    user_id: Int!
+  ): Comment!
 }
 type PostLikeType {
   id: Int!
