@@ -16,6 +16,9 @@ export const Styles = StyleSheet.create({
     paddingRight: 20,
     borderRadius: 5,
   },
+  margin: {
+    marginTop: 10,
+  },
   author: {
     fontWeight: "600",
     color: Theme.CORE_BLACK,

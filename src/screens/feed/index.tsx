@@ -1,6 +1,12 @@
-import React, { Component, Fragment } from "react";
-import type { ListRenderItemInfo } from "react-native";
-import { Animated } from "react-native";
+import React, { Component } from "react";
+import type {
+  ListRenderItemInfo,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+} from "react-native";
+import { Animated, View, Dimensions } from "react-native";
+import type { WithSafeAreaInsetsProps } from "react-native-safe-area-context";
+import { withSafeAreaInsets } from "react-native-safe-area-context";
 import { Router } from "@figliolia/rn-navigation";
 import type { Post, Query, QueryFeedArgs } from "@packages/graphql";
 import { graphQLRequest } from "@packages/graphql";
@@ -10,7 +16,7 @@ import { Authentication } from "@packages/state/Authentication";
 import { PostTile } from "@packages/components/post-tile";
 import { AddPost } from "@packages/components/add-post";
 import { connectCommentTransition } from "@packages/state/CommentTransition";
-import { basicInterpolator } from "@packages/styles";
+import { Theme, basicInterpolator } from "@packages/styles";
 import { Styles } from "./Styles";
 
 interface State {
@@ -19,14 +25,16 @@ interface State {
   startIndex: number;
 }
 
-interface Props {
+interface Props extends WithSafeAreaInsetsProps {
   Y: number;
   feed: Post[];
-  index: number;
+  postIndex: number;
 }
 
 class FeedComponent extends Component<Props, State> {
   state: State;
+  private static scrollPosition = 0;
+  private FlatList?: Animated.FlatList;
   private animator = new Animated.Value(0);
   private activePostAnimator = new Animated.Value(1);
   constructor(props: Props) {
@@ -40,16 +48,25 @@ class FeedComponent extends Component<Props, State> {
   }
 
   public override componentDidMount() {
-    void this.fetchFeed();
     if (Router.lastRoute === "comments") {
       this.animator.setValue(1);
       void this.transition(0);
       this.activePostAnimator.setValue(0);
+      setTimeout(() => {
+        if (this.FlatList) {
+          this.FlatList.scrollToOffset({
+            animated: false,
+            offset: FeedComponent.scrollPosition,
+          });
+        }
+      }, 0);
+    } else {
+      void this.fetchFeed();
     }
   }
 
   public override componentDidUpdate(pp: Props) {
-    if (this.props.index !== pp.index && this.props.index !== -1) {
+    if (this.props.postIndex !== pp.postIndex && this.props.postIndex !== -1) {
       this.transitionActivePost(0);
     }
   }
@@ -79,7 +96,7 @@ class FeedComponent extends Component<Props, State> {
         index={index}
         style={{
           opacity:
-            index === this.props.index
+            index === this.props.postIndex
               ? basicInterpolator(this.activePostAnimator)
               : 1,
         }}
@@ -109,17 +126,33 @@ class FeedComponent extends Component<Props, State> {
     }).start();
   }
 
+  private cacheReference = (c: Animated.FlatList) => {
+    this.FlatList = c;
+  };
+
+  private cacheScrollPosition = (
+    e: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    FeedComponent.scrollPosition = e.nativeEvent.contentOffset.y;
+  };
+
   render() {
-    const { feed } = this.props;
+    const { feed, insets } = this.props;
+    const viewHeight =
+      Dimensions.get("screen").height - (insets.top + Theme.TABS_HEIGHT);
     return (
-      <Fragment>
+      <View style={Styles.container}>
         <Animated.FlatList
           data={feed}
+          ref={this.cacheReference}
           renderItem={this.renderItem}
+          onMomentumScrollEnd={this.cacheScrollPosition}
           contentContainerStyle={Styles.itemContainer}
           style={[
             Styles.scrollView,
             {
+              height: viewHeight,
+              maxHeight: viewHeight,
               opacity: this.animator.interpolate({
                 inputRange: [0, 1],
                 outputRange: [1, 0],
@@ -136,12 +169,14 @@ class FeedComponent extends Component<Props, State> {
           ]}
         />
         <AddPost />
-      </Fragment>
+      </View>
     );
   }
 }
 
-export const Feed = connectCommentTransition(({ index, Y }) => ({
-  Y,
-  index,
-}))(connectFeed(({ feed }) => ({ feed }))(FeedComponent));
+export const Feed = withSafeAreaInsets(
+  connectCommentTransition(({ postIndex, Y }) => ({
+    Y,
+    postIndex,
+  }))(connectFeed(({ feed }) => ({ feed }))(FeedComponent)),
+);

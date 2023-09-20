@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import type { ListRenderItemInfo } from "react-native";
-import { Animated, Dimensions, LayoutAnimation } from "react-native";
+import { Animated, LayoutAnimation } from "react-native";
 import { Router } from "@figliolia/rn-navigation";
 import type { Comment as IComment } from "@packages/graphql";
 import { connectCommentTransition } from "@packages/state/CommentTransition";
@@ -14,18 +14,13 @@ import { Styles } from "./Styles";
 
 interface Props {
   ID: number;
-  height: number;
+  postIndex: number;
   comments: IComment[];
 }
 
-interface State {
-  offsetHeight: number;
-}
-
-class CommentListComponent extends Component<Props, State> {
+class CommentListComponent extends Component<Props> {
   private UIView?: Animated.FlatList;
   private animator = new Animated.Value(0);
-  public state: State = { offsetHeight: 0 };
   private static readonly transitionConfig = {
     ...LayoutAnimation.Presets.linear,
     duration: 200,
@@ -36,7 +31,7 @@ class CommentListComponent extends Component<Props, State> {
   }
 
   public override componentDidMount() {
-    void PostComments.refresh(this.props.ID);
+    void PostComments.refreshComments(this.props.ID);
     Animated.timing(this.animator, {
       toValue: 1,
       delay: 800,
@@ -56,7 +51,7 @@ class CommentListComponent extends Component<Props, State> {
 
   public override componentDidUpdate(pp: Props) {
     if (this.props.ID !== pp.ID) {
-      void PostComments.refresh(this.props.ID);
+      void PostComments.refreshComments(this.props.ID);
     }
   }
 
@@ -73,7 +68,16 @@ class CommentListComponent extends Component<Props, State> {
   }
 
   private renderItem = ({ index, item }: ListRenderItemInfo<IComment>) => {
-    return <Comment index={index} comment={item} key={item.id} />;
+    return (
+      <Comment
+        index={index}
+        comment={item}
+        key={item.id}
+        styles={{
+          marginTop: index === this.props.comments.length - 1 ? 15 : 0,
+        }}
+      />
+    );
   };
 
   private cacheReference = (c: Animated.FlatList) => {
@@ -85,11 +89,7 @@ class CommentListComponent extends Component<Props, State> {
   };
 
   render() {
-    const { height, comments } = this.props;
-    const { offsetHeight } = this.state;
-    const maxHeight =
-      Dimensions.get("screen").height -
-      (this.props.height * 1.1 + offsetHeight + 100);
+    const { comments } = this.props;
     return (
       <Animated.FlatList
         inverted
@@ -101,9 +101,6 @@ class CommentListComponent extends Component<Props, State> {
         style={[
           Styles.scrollView,
           {
-            maxHeight,
-            height: maxHeight,
-            marginTop: height * 1.1,
             opacity: basicInterpolator(this.animator),
           },
         ]}
@@ -115,8 +112,8 @@ class CommentListComponent extends Component<Props, State> {
 export const CommentList = connectPostComments(({ comments }) => ({
   comments,
 }))(
-  connectCommentTransition(({ post, height }) => ({
+  connectCommentTransition(({ postIndex, post }) => ({
+    postIndex,
     ID: post.id,
-    height,
   }))(CommentListComponent),
 );

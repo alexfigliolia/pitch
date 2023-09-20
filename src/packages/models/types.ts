@@ -4,6 +4,6 @@ export interface ITransitionState {
   X: number;
   Y: number;
   post: Post;
-  index: number;
   height: number;
+  postIndex: number;
 }

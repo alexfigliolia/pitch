@@ -1,31 +1,39 @@
 import { State } from "@figliolia/galena";
-import type { Post } from "@packages/graphql";
+import { Visibility, type Post } from "@packages/graphql";
 import type { ITransitionState } from "./types";
+import { Feed } from "@packages/state/Feed";
 
 export class CommentTransitionModel extends State<ITransitionState> {
+  private listener: string;
   constructor() {
     super("Comment Transition", {
       X: 0,
       Y: 0,
-      index: -1,
       height: 0,
+      postIndex: -1,
       post: CommentTransitionModel.emptyPost,
+    });
+    this.listener = Feed.subscribe(feedState => {
+      this.update(state => {
+        state.post =
+          feedState.feed[state.postIndex] || CommentTransitionModel.emptyPost;
+      });
     });
   }
 
-  public set(nextState: Omit<ITransitionState, "active" | "animationState">) {
+  public set(nextState: Omit<ITransitionState, "post">) {
     this.update(state => {
       state.X = nextState.X;
       state.Y = nextState.Y;
-      state.post = nextState.post;
-      state.index = nextState.index;
       state.height = nextState.height;
+      state.postIndex = nextState.postIndex;
+      state.post = Feed.getState().feed[nextState.postIndex];
     });
   }
 
   public resetIndex() {
     return this.update(state => {
-      state.index = -1;
+      state.postIndex = -1;
     });
   }
 
@@ -33,13 +41,38 @@ export class CommentTransitionModel extends State<ITransitionState> {
     this.update(state => {
       state.X = 0;
       state.Y = 0;
-      state.index = -1;
       state.height = 0;
+      state.postIndex = -1;
       state.post = CommentTransitionModel.emptyPost;
     });
   }
 
-  private static get emptyPost() {
-    return {} as unknown as Post;
+  public destroy() {
+    Feed.unsubscribe(this.listener);
+  }
+
+  private static get emptyPost(): Post {
+    return {
+      __typename: "Post",
+      _count: {
+        __typename: "PostStats",
+        comments: 0,
+        likes: 0,
+      },
+      created_at: "",
+      /** Author */
+      created_by: {
+        __typename: "user",
+        email: "",
+        id: -1,
+        name: "",
+        verified: false,
+      },
+      id: -1,
+      tags: [],
+      text: "",
+      title: "",
+      visibility: Visibility.Friends,
+    };
   }
 }

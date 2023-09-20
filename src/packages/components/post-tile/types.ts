@@ -1,8 +1,10 @@
 import type { Post } from "@packages/graphql";
-import type { ViewStyle } from "react-native";
+import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 
 export interface Props {
   post: Post;
   index: number;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  titleStyle?: StyleProp<TextStyle>;
+  descriptionStyle?: StyleProp<TextStyle>;
 }

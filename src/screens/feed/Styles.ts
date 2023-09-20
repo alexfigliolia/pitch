@@ -2,8 +2,12 @@ import { UtilityStyles } from "@packages/styles";
 import { StyleSheet } from "react-native";
 
 export const Styles = StyleSheet.create({
-  scrollView: {
+  container: {
     ...UtilityStyles.Fill,
+    justifyContent: "flex-end",
+  },
+  scrollView: {
+    width: "100%",
     overflow: "visible",
   },
   itemContainer: {

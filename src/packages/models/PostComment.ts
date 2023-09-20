@@ -9,15 +9,17 @@ interface IPostComments {
 
 export class PostCommentsModel extends State<IPostComments> {
   constructor() {
-    super("Post Comments", { comments: [] });
+    super("Post Comments", {
+      comments: [],
+    });
   }
-  public set(comments: Comment[]) {
+  public setComments(comments: Comment[]) {
     this.update(state => {
       state.comments = comments;
     });
   }
 
-  public async refresh(post_id: number) {
+  public async refreshComments(post_id: number) {
     const response = await graphQLRequest<
       Pick<Query, "postComments">,
       PostCommentsQueryVariables
@@ -25,7 +27,7 @@ export class PostCommentsModel extends State<IPostComments> {
       query: PostCommentsQuery,
       variables: { post_id },
     });
-    this.set(response.data.postComments.reverse());
+    this.setComments(response.data.postComments.reverse());
   }
 
   public addComment(comment: Comment) {

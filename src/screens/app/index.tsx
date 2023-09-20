@@ -4,8 +4,7 @@ import { Feed } from "@screens/feed";
 import { Settings } from "@screens/settings";
 import { Comments } from "@screens/comments";
 import { CreatePost } from "@screens/create-post";
-import { CoreTabs } from "@packages/core-layout/core-tabs";
-import { CoreView } from "@packages/core-layout/core-view";
+import { CoreTabs, CoreView } from "@packages/core-layout";
 import { AuthenticatedRoute } from "@packages/components/authenticated-route";
 
 export class App extends Component {

@@ -1,147 +1,163 @@
-import type { FC } from "react";
-import React, { useCallback, useEffect, useRef } from "react";
-import { Animated, Dimensions, Keyboard } from "react-native";
+import React, { Component } from "react";
+import { Animated, Dimensions, Keyboard, LayoutAnimation } from "react-native";
 import { Router } from "@figliolia/rn-navigation";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { WithSafeAreaInsetsProps } from "react-native-safe-area-context";
+import { withSafeAreaInsets } from "react-native-safe-area-context";
 import { PostTile } from "@packages/components/post-tile";
 import {
   CommentTransition,
-  useCommentTransition,
+  connectCommentTransition,
 } from "@packages/state/CommentTransition";
 import { CloseButton } from "@packages/components/close-button";
 import { Theme, basicInterpolator } from "@packages/styles";
+import type { ITransitionState } from "@packages/models/types";
+import type { Post } from "@packages/graphql";
 import { Styles } from "./Styles";
 
-export const FocusedPost: FC<Record<string, never>> = () => {
-  const offsets = useSafeAreaInsets();
-  const postAnimator = useRef(new Animated.Value(0));
-  const shadowAnimator = useRef(new Animated.Value(0));
-  const buttonAnimator = useRef(new Animated.Value(0));
-  const X = useCommentTransition(state => state.X);
-  const Y = useCommentTransition(state => state.Y);
-  const post = useCommentTransition(state => state.post);
-  const index = useCommentTransition(state => state.index);
-  const height = useCommentTransition(state => state.height);
+interface Props extends ITransitionState, WithSafeAreaInsetsProps {
+  post: Post;
+}
+interface State {
+  titleFontSize: number;
+  descriptionFontSize: number;
+}
 
-  const wrap = useCallback((animation: Animated.CompositeAnimation) => {
-    return new Promise<void>(resolve => {
-      animation.start(() => {
-        resolve();
-      });
-    });
-  }, []);
+export class FocusedPostComponent extends Component<Props, State> {
+  private postAnimator = new Animated.Value(0);
+  private buttonAnimator = new Animated.Value(0);
+  public state = { titleFontSize: 14, descriptionFontSize: 12 };
 
-  const reverse = useCallback(() => {
-    return new Promise<void>(resolve => {
-      Keyboard.dismiss();
-      const duration = Math.max(400, Y);
-      void Promise.all([
-        wrap(
-          Animated.timing(postAnimator.current, {
-            toValue: 0,
-            delay: 400,
-            duration,
-            useNativeDriver: false,
-          }),
-        ),
-        wrap(
-          Animated.timing(buttonAnimator.current, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-        ),
-      ]).then(() => {
-        CommentTransition.resetIndex();
-        setTimeout(resolve, 10);
-      });
-    });
-  }, [Y, wrap]);
-
-  useEffect(() => {
-    const postValue = postAnimator.current;
-    const shadowValue = shadowAnimator.current;
-    const buttonValue = buttonAnimator.current;
+  public override componentDidMount() {
+    Router.registerExitTransition(this.reverse);
+    const duration = Math.max(400, this.props.Y);
     Animated.sequence([
-      Animated.timing(postValue, {
+      Animated.timing(this.postAnimator, {
+        duration,
         toValue: 1,
         delay: 200,
         useNativeDriver: false,
-        duration: Math.max(400, Y),
       }),
-      Animated.timing(buttonValue, {
+      Animated.timing(this.buttonAnimator, {
         toValue: 1,
         duration: 500,
         useNativeDriver: false,
       }),
     ]).start();
-    return () => {
-      postValue.setValue(0);
-      shadowValue.setValue(0);
-      buttonValue.setValue(0);
-    };
-  }, [Y]);
+    setTimeout(() => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      this.setState({
+        titleFontSize: 16,
+        descriptionFontSize: 14,
+      });
+    }, 200 + duration * 0.25);
+  }
 
-  useEffect(() => {
-    Router.registerExitTransition(reverse);
-  }, [reverse]);
-
-  const navigate = useCallback(() => {
+  private navigate = () => {
     Router.navigate("feed");
-  }, []);
+  };
 
-  return (
-    <Animated.View
-      style={[
-        Styles.container,
-        {
-          width: postAnimator.current.interpolate({
-            inputRange: [0, 1],
-            outputRange: [
-              Dimensions.get("screen").width * 0.9,
-              Dimensions.get("screen").width,
-            ],
-          }),
-          height: postAnimator.current.interpolate({
-            inputRange: [0, 1],
-            outputRange: [height, height * 1.1 + offsets.top],
-          }),
-          borderRadius: postAnimator.current.interpolate({
-            inputRange: [0, 1],
-            outputRange: [5, 0],
-          }),
-          transform: [
-            {
-              translateY: postAnimator.current.interpolate({
-                inputRange: [0, 1],
-                outputRange: [Y - offsets.top, -offsets.top],
-              }),
-            },
-            {
-              translateX: postAnimator.current.interpolate({
-                inputRange: [0, 1],
-                outputRange: [offsets.left + X, 0],
-              }),
-            },
-          ],
-        },
-      ]}>
-      <PostTile index={index} post={post} style={Styles.post} />
-      <CloseButton
-        onPress={navigate}
-        iconColor={Theme.GRAY_TEXT}
+  private reverse = () => {
+    return new Promise<void>(resolve => {
+      Keyboard.dismiss();
+      const duration = Math.max(400, this.props.Y);
+      Animated.parallel([
+        Animated.timing(this.postAnimator, {
+          toValue: 0,
+          delay: 400,
+          duration,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this.buttonAnimator, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+      ]).start(() => {
+        CommentTransition.resetIndex();
+        setTimeout(resolve, 10);
+      });
+      setTimeout(() => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
+        this.setState({
+          titleFontSize: 14,
+          descriptionFontSize: 12,
+        });
+      }, 400);
+    });
+  };
+
+  render() {
+    const { X, Y, height, postIndex, insets, post } = this.props;
+    const { titleFontSize, descriptionFontSize } = this.state;
+    return (
+      <Animated.View
         style={[
-          Styles.closeButton,
+          Styles.container,
           {
-            top: offsets.top + height * 0.1,
+            width: this.postAnimator.interpolate({
+              inputRange: [0, 1],
+              outputRange: [
+                Dimensions.get("screen").width * 0.9,
+                Dimensions.get("screen").width,
+              ],
+            }),
+            height: this.postAnimator.interpolate({
+              inputRange: [0, 1],
+              outputRange: [height, height * 1.3 + insets.top],
+            }),
+            borderRadius: this.postAnimator.interpolate({
+              inputRange: [0, 1],
+              outputRange: [5, 0],
+            }),
             transform: [
               {
-                scale: basicInterpolator(buttonAnimator.current),
+                translateY: this.postAnimator.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [Y, 0],
+                }),
+              },
+              {
+                translateX: this.postAnimator.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [insets.left + X, 0],
+                }),
               },
             ],
           },
-        ]}
-      />
-    </Animated.View>
-  );
-};
+        ]}>
+        <PostTile
+          post={post}
+          index={postIndex}
+          style={Styles.post}
+          titleStyle={{ fontSize: titleFontSize }}
+          descriptionStyle={{ fontSize: descriptionFontSize }}
+        />
+        <CloseButton
+          onPress={this.navigate}
+          iconColor={Theme.GRAY_TEXT}
+          style={[
+            Styles.closeButton,
+            {
+              top: insets.top + height * 0.3,
+              transform: [
+                {
+                  scale: basicInterpolator(this.buttonAnimator),
+                },
+              ],
+            },
+          ]}
+        />
+      </Animated.View>
+    );
+  }
+}
+
+export const FocusedPost = withSafeAreaInsets(
+  connectCommentTransition(({ X, Y, postIndex, height, post }) => ({
+    X,
+    Y,
+    post,
+    height,
+    postIndex,
+  }))(FocusedPostComponent),
+);

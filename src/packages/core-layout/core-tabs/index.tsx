@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import React, { memo } from "react";
 import { Styles } from "./Styles";
-import { TabButton } from "@packages/core-layout/tab-button";
+import { TabButton } from "@packages/core-layout";
 import { View } from "react-native";
 
 export const CoreTabs: FC<Record<string, never>> = memo(() => {

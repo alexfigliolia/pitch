@@ -21,6 +21,8 @@ export class PostTile extends Component<Props> {
 
   static defaultProps = {
     style: {},
+    titleStyle: {},
+    descriptionStyle: {},
   };
 
   private likeOrUnlike = () => {
@@ -37,8 +39,7 @@ export class PostTile extends Component<Props> {
         height,
         X: pageX,
         Y: pageY,
-        post: this.props.post,
-        index: this.props.index,
+        postIndex: this.props.index,
       });
       Router.navigate("comments");
     });
@@ -73,19 +74,23 @@ export class PostTile extends Component<Props> {
   }
 
   render() {
-    const { post, style } = this.props;
+    const { post, style, titleStyle, descriptionStyle } = this.props;
     return (
       <Animated.View
         style={[Styles.container, style]}
         ref={this.cacheReference}>
         <View style={Styles.content}>
           <View style={Styles.title}>
-            <Text style={Styles.titleText}>{post.title}</Text>
+            <Animated.Text style={[Styles.titleText, titleStyle]}>
+              {post.title}
+            </Animated.Text>
           </View>
           <View style={Styles.description}>
-            <Text style={Styles.descriptionText} numberOfLines={2}>
+            <Animated.Text
+              style={[Styles.descriptionText, descriptionStyle]}
+              numberOfLines={2}>
               {post.text}
-            </Text>
+            </Animated.Text>
           </View>
           <View style={Styles.footer}>
             <TouchableOpacity
@@ -105,8 +110,10 @@ export class PostTile extends Component<Props> {
               <Text style={Styles.actionText}>{post._count.comments}</Text>
               <View style={Styles.actionIcon}>
                 <Comment
-                  fill={this.liked}
-                  color={this.liked ? Theme.CORE_BLUE : Theme.GRAY_TEXT}
+                  fill={!!post._count.comments}
+                  color={
+                    post._count.comments ? Theme.CORE_BLUE : Theme.GRAY_TEXT
+                  }
                 />
               </View>
             </TouchableOpacity>
