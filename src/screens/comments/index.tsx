@@ -8,10 +8,7 @@ import { Styles } from "./Styles";
 
 export const Comments: FC<Record<string, never>> = () => {
   return (
-    <KeyboardAvoidingView
-      behavior="height"
-      style={Styles.container}
-      keyboardVerticalOffset={50}>
+    <KeyboardAvoidingView behavior="height" style={Styles.container}>
       <FocusedPost />
       <CommentList />
       <AddComment />

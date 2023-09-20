@@ -29,18 +29,29 @@ class AddCommentComponent extends Component<Props, State> {
   private TextInput?: TextInput;
   public state = { comment: "" };
   private animator = new Animated.Value(0);
+  private timer: ReturnType<typeof setTimeout> | null = null;
   constructor(props: Props) {
     super(props);
     Router.registerExitTransition(this.exit.bind(this));
   }
 
   public override componentDidMount() {
+    this.timer = setTimeout(() => {
+      this.TextInput?.focus?.();
+    }, 700);
     Animated.timing(this.animator, {
       toValue: 1,
       delay: 700,
       duration: 300,
       useNativeDriver: true,
     }).start();
+  }
+
+  public override componentWillUnmount() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
   }
 
   private exit() {
@@ -92,7 +103,6 @@ class AddCommentComponent extends Component<Props, State> {
   render() {
     return (
       <Animated.View
-        ref={this.cacheReference}
         style={[
           Styles.container,
           {
@@ -101,13 +111,13 @@ class AddCommentComponent extends Component<Props, State> {
         ]}>
         <View style={Styles.inputContainer}>
           <TextInput
-            autoFocus
             multiline
             inputMode="text"
             numberOfLines={3}
             enterKeyHint="done"
             style={Styles.input}
             placeholder="Comment"
+            ref={this.cacheReference}
             value={this.state.comment}
             onChangeText={this.setComment}
             clearButtonMode="while-editing"

@@ -34,6 +34,9 @@ export class PostTile extends Component<Props> {
   };
 
   private transitionToComment = () => {
+    if (Router.currentRoute === "comments") {
+      return;
+    }
     this.UIView?.measure((_1, _2, _3, height, pageX, pageY) => {
       CommentTransition.set({
         height,
@@ -105,8 +108,8 @@ export class PostTile extends Component<Props> {
               </View>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={this.transitionToComment}
-              style={Styles.footerAction}>
+              style={Styles.footerAction}
+              onPress={this.transitionToComment}>
               <Text style={Styles.actionText}>{post._count.comments}</Text>
               <View style={Styles.actionIcon}>
                 <Comment
