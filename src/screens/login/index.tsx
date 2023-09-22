@@ -99,12 +99,7 @@ export class Login extends Component<Record<string, never>, State> {
         plugins: [SetCookiePlugin],
       });
       const user = response.data.login;
-      Authentication.update(state => {
-        state.id = user.id;
-        state.name = user.name;
-        state.email = user.email;
-        state.verified = user.verified;
-      });
+      Authentication.setUser(user);
       this.setState({
         loading: false,
         success: true,

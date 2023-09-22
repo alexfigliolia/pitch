@@ -37,12 +37,7 @@ export const AuthenticatedRoute: FC<Props> = ({
           return Router.navigate(redirect);
         }
         const user = response.data.verifyTokenMobile;
-        Authentication.update(state => {
-          state.id = user.id;
-          state.name = user.name;
-          state.email = user.email;
-          state.verified = user.verified;
-        });
+        Authentication.setUser(user);
         setChecked(true);
       } catch (error) {
         return Router.navigate(redirect);

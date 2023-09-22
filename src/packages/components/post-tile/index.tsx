@@ -1,7 +1,11 @@
 import React, { Component } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 import { Router } from "@figliolia/rn-navigation";
-import type { AddPostLikeMutationVariables, Mutation } from "@packages/graphql";
+import type {
+  Post,
+  Mutation,
+  AddPostLikeMutationVariables,
+} from "@packages/graphql";
 import { graphQLRequest } from "@packages/graphql";
 import { Theme } from "@packages/styles";
 import {
@@ -9,7 +13,6 @@ import {
   removePostLikeMutation,
 } from "@packages/graphql/queries/posts.gql";
 import { Authentication } from "@packages/state/Authentication";
-import { Feed as FeedState } from "@packages/state/Feed";
 import { Heart } from "@packages/icons/heart";
 import { Comment } from "@packages/icons/comment";
 import { CommentTransition } from "@packages/state/CommentTransition";
@@ -26,10 +29,11 @@ export class PostTile extends Component<Props> {
   };
 
   private likeOrUnlike = () => {
-    if (this.props.post._count.likes === 1) {
-      void this.unlike();
+    const { post, onLike, onUnlike } = this.props;
+    if (post._count.likes === 1) {
+      void this.unlike(onUnlike);
     } else {
-      void this.like();
+      void this.like(onLike);
     }
   };
 
@@ -37,12 +41,14 @@ export class PostTile extends Component<Props> {
     if (Router.currentRoute === "comments") {
       return;
     }
+    const { post, index } = this.props;
     this.UIView?.measure((_1, _2, _3, height, pageX, pageY) => {
       CommentTransition.set({
+        post,
         height,
         X: pageX,
         Y: pageY,
-        postIndex: this.props.index,
+        postIndex: index,
       });
       Router.navigate("comments");
     });
@@ -50,10 +56,10 @@ export class PostTile extends Component<Props> {
 
   private like = this.GQL(addPostLikeMutation);
 
-  private unlike = this.GQL(removePostLikeMutation, -1);
+  private unlike = this.GQL(removePostLikeMutation);
 
-  private GQL(query: string, target: 1 | -1 = 1) {
-    return async () => {
+  private GQL(query: string) {
+    return async (cb: (post: Post) => void) => {
       await graphQLRequest<
         Pick<Mutation, "addPostLike">,
         AddPostLikeMutationVariables
@@ -64,7 +70,7 @@ export class PostTile extends Component<Props> {
           user_id: Authentication.getState().id,
         },
       });
-      FeedState.likePost(this.props.index, target);
+      cb(this.props.post);
     };
   }
 

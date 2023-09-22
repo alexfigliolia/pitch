@@ -13,12 +13,13 @@ import {
 import { Styles } from "./Styles";
 
 interface Props {
-  ID: number;
+  post_id: number;
   postIndex: number;
   comments: IComment[];
 }
 
 class CommentListComponent extends Component<Props> {
+  private scroll = false;
   private UIView?: Animated.FlatList;
   private animator = new Animated.Value(0);
   private static readonly transitionConfig = {
@@ -31,7 +32,7 @@ class CommentListComponent extends Component<Props> {
   }
 
   public override componentDidMount() {
-    void PostComments.refreshComments(this.props.ID);
+    void PostComments.refreshComments(this.props.post_id);
     Animated.timing(this.animator, {
       toValue: 1,
       delay: 800,
@@ -43,16 +44,22 @@ class CommentListComponent extends Component<Props> {
   public override UNSAFE_componentWillReceiveProps({ comments }: Props) {
     if (comments.length !== this.props.comments.length) {
       LayoutAnimation.configureNext(CommentListComponent.transitionConfig);
-      void Promise.resolve().then(() => {
-        this.UIView?.scrollToOffset({ animated: true, offset: 0 });
-      });
+      this.scroll = true;
     }
   }
 
   public override componentDidUpdate(pp: Props) {
-    if (this.props.ID !== pp.ID) {
-      void PostComments.refreshComments(this.props.ID);
+    if (this.props.post_id !== pp.post_id) {
+      void PostComments.refreshComments(this.props.post_id);
     }
+    if (this.scroll) {
+      this.scroll = false;
+      this.scrollToEnd();
+    }
+  }
+
+  private scrollToEnd() {
+    this.UIView?.scrollToEnd({ animated: true });
   }
 
   private exit() {
@@ -74,7 +81,7 @@ class CommentListComponent extends Component<Props> {
         comment={item}
         key={item.id}
         styles={{
-          marginTop: index === this.props.comments.length - 1 ? 15 : 0,
+          marginTop: index === 0 ? 15 : 0,
         }}
       />
     );
@@ -88,12 +95,17 @@ class CommentListComponent extends Component<Props> {
     return comment.id.toString();
   };
 
+  private onInitialSize: undefined | (() => void) = () => {
+    // this.UIView?.scrollToEnd({ animated: false });
+    // this.onInitialSize = undefined;
+  };
+
   render() {
     const { comments } = this.props;
     return (
       <Animated.FlatList
-        inverted
         data={comments}
+        onContentSizeChange={this.onInitialSize}
         ref={this.cacheReference}
         renderItem={this.renderItem}
         keyExtractor={this.extractItem}
@@ -114,6 +126,6 @@ export const CommentList = connectPostComments(({ comments }) => ({
 }))(
   connectCommentTransition(({ postIndex, post }) => ({
     postIndex,
-    ID: post.id,
+    post_id: post.id,
   }))(CommentListComponent),
 );

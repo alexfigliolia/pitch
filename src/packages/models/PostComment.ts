@@ -27,12 +27,12 @@ export class PostCommentsModel extends State<IPostComments> {
       query: PostCommentsQuery,
       variables: { post_id },
     });
-    this.setComments(response.data.postComments.reverse());
+    this.setComments(response.data.postComments);
   }
 
   public addComment(comment: Comment) {
     this.update(state => {
-      state.comments = [comment, ...state.comments];
+      state.comments = [...state.comments, comment];
     });
   }
 }

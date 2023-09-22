@@ -5,6 +5,7 @@ export const UserFragment = gql`
     id
     name
     email
+    image
     verified
   }
 `;

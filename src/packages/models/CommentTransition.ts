@@ -1,10 +1,12 @@
 import { State } from "@figliolia/galena";
 import { Visibility, type Post } from "@packages/graphql";
-import type { ITransitionState } from "./types";
 import { Feed } from "@packages/state/Feed";
+import { ProfileFeed } from "@packages/state/ProfileFeed";
+import type { ITransitionState } from "./types";
 
 export class CommentTransitionModel extends State<ITransitionState> {
-  private listener: string;
+  private feedListener: string;
+  private profileListener: string;
   constructor() {
     super("Comment Transition", {
       X: 0,
@@ -13,21 +15,17 @@ export class CommentTransitionModel extends State<ITransitionState> {
       postIndex: -1,
       post: CommentTransitionModel.emptyPost,
     });
-    this.listener = Feed.subscribe(feedState => {
-      this.update(state => {
-        state.post =
-          feedState.feed[state.postIndex] || CommentTransitionModel.emptyPost;
-      });
-    });
+    this.feedListener = Feed.subscribe(this.onFeedUpdate);
+    this.profileListener = ProfileFeed.subscribe(this.onFeedUpdate);
   }
 
-  public set(nextState: Omit<ITransitionState, "post">) {
+  public set(nextState: ITransitionState) {
     this.update(state => {
       state.X = nextState.X;
       state.Y = nextState.Y;
+      state.post = nextState.post;
       state.height = nextState.height;
       state.postIndex = nextState.postIndex;
-      state.post = Feed.getState().feed[nextState.postIndex];
     });
   }
 
@@ -48,8 +46,16 @@ export class CommentTransitionModel extends State<ITransitionState> {
   }
 
   public destroy() {
-    Feed.unsubscribe(this.listener);
+    Feed.unsubscribe(this.feedListener);
+    ProfileFeed.unsubscribe(this.profileListener);
   }
+
+  private onFeedUpdate = (feedState: (typeof Feed)["state"]) => {
+    this.update(state => {
+      state.post =
+        feedState.feed[state.postIndex] || CommentTransitionModel.emptyPost;
+    });
+  };
 
   private static get emptyPost(): Post {
     return {
@@ -66,6 +72,7 @@ export class CommentTransitionModel extends State<ITransitionState> {
         email: "",
         id: -1,
         name: "",
+        image: "",
         verified: false,
       },
       id: -1,

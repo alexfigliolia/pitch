@@ -13,6 +13,8 @@ import { Theme, basicInterpolator } from "@packages/styles";
 import type { ITransitionState } from "@packages/models/types";
 import type { Post } from "@packages/graphql";
 import { Styles } from "./Styles";
+import { Feed } from "@packages/state/Feed";
+import { ProfileFeed } from "@packages/state/ProfileFeed";
 
 interface Props extends ITransitionState, WithSafeAreaInsetsProps {
   post: Post;
@@ -53,7 +55,7 @@ export class FocusedPostComponent extends Component<Props, State> {
   }
 
   private navigate = () => {
-    Router.navigate("feed");
+    Router.goBack();
   };
 
   private reverse = () => {
@@ -74,7 +76,7 @@ export class FocusedPostComponent extends Component<Props, State> {
         }),
       ]).start(() => {
         CommentTransition.resetIndex();
-        setTimeout(resolve, 10);
+        setTimeout(resolve, 800);
       });
       setTimeout(() => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
@@ -84,6 +86,16 @@ export class FocusedPostComponent extends Component<Props, State> {
         });
       }, 400);
     });
+  };
+
+  private onLike = (post: Post) => {
+    Feed.likePost(post.id, 1);
+    ProfileFeed.likePost(post.id, 1);
+  };
+
+  private onUnlike = (post: Post) => {
+    Feed.likePost(post.id, -1);
+    ProfileFeed.likePost(post.id, -1);
   };
 
   render() {
@@ -129,6 +141,8 @@ export class FocusedPostComponent extends Component<Props, State> {
           post={post}
           index={postIndex}
           style={Styles.post}
+          onLike={this.onLike}
+          onUnlike={this.onUnlike}
           titleStyle={{ fontSize: titleFontSize }}
           descriptionStyle={{ fontSize: descriptionFontSize }}
         />

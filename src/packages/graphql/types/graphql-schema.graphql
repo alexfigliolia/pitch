@@ -19,6 +19,12 @@ type Query {
     "The start index of posts to pull"
     startIndex: Int!
   ): [Post!]!
+  profileFeed(
+    "User primary key"
+    id: Int!,
+    "The start index of posts to pull"
+    startIndex: Int!
+  ): [Post!]!
   verifyToken: user!
   postComments(
     "A post's primary key"
@@ -33,6 +39,7 @@ type user {
   id: Int!
   name: String!
   email: String!
+  image: String!
   verified: Boolean!
 }
 type Post {
@@ -109,12 +116,19 @@ type Mutation {
     "A user's primary key"
     user_id: Int!
   ): Comment!
+  profilePhotoUploadSignature: UploadSignature!
 }
 type PostLikeType {
   id: Int!
   user_id: Int!
   post_id: Int!
   created_by: user!
+}
+type UploadSignature {
+  signature: String!
+  timestamp: String!
+  cloud_name: String!
+  api_key: String!
 }
 enum Visibility {
   public

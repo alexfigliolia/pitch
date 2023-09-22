@@ -20,22 +20,23 @@ export class FeedModel extends State<{ feed: Post[] }> {
     this.update(state => {
       const beginning = state.feed.slice(0, index);
       const end = state.feed.slice(index + 1);
-      const update = state.feed[index];
+      const update = { ...state.feed[index] };
       update._count.comments++;
       state.feed = [...beginning, update, ...end];
     });
   }
 
-  public likePost(index: number, nextValue = 1) {
+  public likePost(ID: number, increment: 1 | -1) {
     const { feed } = this.getState();
-    const item = feed[index];
-    if (!item) {
+    const postIndex = feed.findIndex(post => post.id === ID);
+    const post = feed[postIndex];
+    if (!post) {
       return;
     }
-    const newItem = { ...item };
-    newItem._count.likes = newItem._count.likes + nextValue;
+    const newItem = { ...post };
+    newItem._count.likes = newItem._count.likes + increment;
     const nextState = [...feed];
-    nextState[index] = newItem;
+    nextState[postIndex] = newItem;
     this.update(state => {
       state.feed = nextState;
     });

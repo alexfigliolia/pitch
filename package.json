@@ -14,6 +14,7 @@
     "start": "react-native start",
     "build": "react-native bundle --entry-file index.ts --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios --minify true",
     "test": "jest",
+    "pitch": "npx ts-node devtools/pitch/CLI.ts --project devtools/tsconfig.json",
     "cli:generate": "ts-node -r tsconfig-paths/register devtools/graphql-codegen/CLI.ts",
     "generate-types": "graphql-codegen"
   },

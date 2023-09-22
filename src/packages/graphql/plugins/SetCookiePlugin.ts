@@ -1,9 +1,13 @@
 import { Plugin } from "./Plugin";
 import { DeviceStorage, type IDeviceStorage } from "@packages/local-storage";
+import { Authentication } from "@packages/state/Authentication";
 import type { GraphQLClientResponse } from "graphql-request/build/esm/types";
 
 export class SetCookiePlugin extends Plugin {
-  static whiteList = new Set<keyof IDeviceStorage>(["P_User"]);
+  private static readonly SESSION_TOKEN = "P_User";
+  private static whiteList = new Set<keyof IDeviceStorage>([
+    this.SESSION_TOKEN,
+  ]);
 
   public override onResponse<T>(response: GraphQLClientResponse<T>) {
     const setCookie = response.headers.get("set-cookie");
@@ -15,6 +19,9 @@ export class SetCookiePlugin extends Plugin {
     for (const [name, value] of tokens) {
       if (!!value && this.isWhiteListed(name)) {
         storageUpdates.push([name, value]);
+        if (name === SetCookiePlugin.SESSION_TOKEN) {
+          Authentication.setToken(value);
+        }
       }
     }
     if (!storageUpdates.length) {

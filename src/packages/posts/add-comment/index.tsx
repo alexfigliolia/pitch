@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Animated, TextInput, TouchableOpacity, View } from "react-native";
-import { Styles } from "./Styles";
+import { Router } from "@figliolia/rn-navigation";
 import { Theme, UtilityStyles, basicInterpolator } from "@packages/styles";
 import { connectCommentTransition } from "@packages/state/CommentTransition";
 import type {
@@ -14,7 +14,8 @@ import { CommentStream } from "@packages/streams";
 import { Up } from "@packages/icons/up";
 import { Feed } from "@packages/state/Feed";
 import { PostComments } from "@packages/state/PostComments";
-import { Router } from "@figliolia/rn-navigation";
+import { ProfileFeed } from "@packages/state/ProfileFeed";
+import { Styles } from "./Styles";
 
 interface Props {
   user_id: number;
@@ -89,12 +90,17 @@ class AddCommentComponent extends Component<Props, State> {
     }).then(res => {
       const comment = res.data.createComment;
       CommentStream.emit("create-comment", comment);
-      this.setComment("");
+      this.clear();
       Feed.addComment(post_id);
+      ProfileFeed.addComment(post_id);
       PostComments.addComment(comment);
-      this.TextInput?.clear?.();
     });
   };
+
+  private clear() {
+    this.setComment("");
+    this.TextInput?.clear?.();
+  }
 
   private cacheReference = (c: TextInput) => {
     this.TextInput = c;

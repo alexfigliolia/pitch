@@ -7,4 +7,6 @@ export interface Props {
   style?: StyleProp<ViewStyle>;
   titleStyle?: StyleProp<TextStyle>;
   descriptionStyle?: StyleProp<TextStyle>;
+  onLike: (post: Post) => void;
+  onUnlike: (post: Post) => void;
 }
